@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>쿠키 과학 실험실 - 제과제빵 예습 프로토타입</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    /* 기본 폰트 및 깔끔한 크림·브라운 카드 톤 설정 */
+    body {
+      font-family: 'Noto Sans KR', 'Inter', sans-serif;
+      background-color: #f7f4ee;
+      color: #2f241d;
+    }
+
+    .font-display {
+      font-family: 'Gaegu', 'Noto Sans KR', sans-serif;
+    }
+
+    /* 직관적인 커스텀 범위 슬라이더 스타일 */
+    input[type="range"].clean-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: #e7ddd0;
+      outline: none;
+    }
+
+    input[type="range"].clean-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      background: #7c4d2b;
+      border: 3px solid #fffdf9;
+      box-shadow: 0 2px 6px rgba(47, 36, 29, 0.25);
+      cursor: pointer;
+    }
+
+    input[type="range"].clean-slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      background: #7c4d2b;
+      border: 3px solid #fffdf9;
+      box-shadow: 0 2px 6px rgba(47, 36, 29, 0.25);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased">
+  <!-- 상단 헤더 & 모드 탭 -->
+  <header class="bg-[#fffdf9] border-b border-[#e5dac9]">
+    <div class="max-w-6xl mx-auto px-5 py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <h1 class="font-display text-3xl text-[#3b291e] leading-none">
+          쿠키 과학 실험실
+        </h1>
+        <p class="text-sm text-[#6e5a4c] mt-1.5">
+          비율과 공정, 오븐 온도가 만드는 식감 변화를 실험하는 제과제빵 예습 노트
+        </p>
+      </div>
+
+      <!-- 상단 4개 모드 탭 -->
+      <nav aria-label="학습 및 실험 모드" class="flex flex-wrap gap-2">
+        <button
+          id="tabQuiz"
+          type="button"
+          class="mode-tab px-4 py-2.5 rounded-xl text-sm font-medium border border-[#dfd2bf] bg-white text-[#4b382b] hover:bg-[#f5efe6] transition cursor-pointer"
+        >
+          기초 10문제 퀴즈
+        </button>
+        <button
+          id="tabGate"
+          type="button"
+          class="mode-tab px-4 py-2.5 rounded-xl text-sm font-medium border border-[#dfd2bf] bg-white text-[#4b382b] hover:bg-[#f5efe6] transition cursor-pointer"
+        >
+          관문 테스트
+        </button>
+        <button
+          id="tabLab"
+          type="button"
+          class="mode-tab px-4 py-2.5 rounded-xl text-sm font-medium border border-[#7c4d2b] bg-[#7c4d2b] text-white transition cursor-pointer"
+        >
+          쿠키 실험실
+        </button>
+        <button
+          id="tabDex"
+          type="button"
+          class="mode-tab px-4 py-2.5 rounded-xl text-sm font-medium border border-[#dfd2bf] bg-white text-[#4b382b] hover:bg-[#f5efe6] transition cursor-pointer"
+        >
+          실험 도감
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 메인 컨테이너 -->
+  <main class="max-w-6xl mx-auto px-5 py-7 space-y-6">
+
+    <!-- [1] 기초 10문제 퀴즈 뷰 -->
+    <section id="viewQuiz" class="hidden space-y-6">
+      <div class="bg-[#fffdf9] rounded-2xl border border-[#e5dac9] p-6 sm:p-7 space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-bold text-[#3b291e]">기초 10문제 퀴즈</h2>
+            <p class="text-sm text-[#6e5a4c] mt-1">
+              학원 수업 전 알아두면 좋은 핵심 개념을 풀고 해설과 키워드를 확인하세요.
+            </p>
+          </div>
+          <div class="flex items-center gap-3">
+            <span id="quizProgressLabel" class="text-sm font-medium text-[#5c483a]">1 / 10 문제</span>
+            <button
+              id="btnRestartQuiz"
+              type="button"
+              class="px-3.5 py-2 rounded-xl text-sm font-medium border border-[#dfd2bf] bg-[#faf6f0] hover:bg-[#efe7dc] text-[#4b382b] transition cursor-pointer"
+            >
+              다시 풀기
+            </button>
+          </div>
+        </div>
+
+        <!-- 진행 바 -->
+        <div class="w-full h-2 rounded-full bg-[#ece2d3] overflow-hidden">
+          <div id="quizBarFill" class="h-full bg-[#7c4d2b] transition-all duration-300" style="width: 10%;"></div>
+        </div>
+
+        <!-- 문제 카드 -->
+        <div id="quizQuestionBox" class="space-y-5">
+          <div class="flex items-center justify-between text-sm text-[#6e5a4c]">
+            <span id="quizTopicLabel" class="font-medium text-[#7c4d2b]"></span>
+            <span id="quizScoreLabel">정답 0개</span>
+          </div>
+
+          <h3 id="quizPromptText" class="text-lg font-bold text-[#2f241d] leading-relaxed"></h3>
+
+          <div id="quizChoicesBox" class="space-y-2.5"></div>
+
+          <!-- 해설 및 키워드 영역 -->
+          <div id="quizFeedbackBox" class="hidden rounded-2xl border border-[#dfd2bf] bg-[#faf6f0] p-5 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span id="quizResultText" class="text-sm font-bold"></span>
+              <span id="quizKeywordText" class="text-sm font-medium text-[#7c4d2b]"></span>
+            </div>
+            <p id="quizExplanationText" class="text-sm text-[#4b382b] leading-relaxed"></p>
+            <div class="pt-1 flex justify-end">
+              <button
+                id="btnNextQuiz"
+                type="button"
+                class="px-4 py-2 rounded-xl text-sm font-medium bg-[#7c4d2b] hover:bg-[#663f23] text-white transition cursor-pointer"
+              >
+                다음 문제
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 10문제 완료 리포트 -->
+        <div id="quizReportBox" class="hidden rounded-2xl border border-[#d5e3da] bg-[#f4f9f6] p-6 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div>
+              <h3 class="text-xl font-bold text-[#274939]">기초 10문제 완료 리포트</h3>
+              <p id="quizReportComment" class="text-sm text-[#426655] mt-1"></p>
+            </div>
+            <div id="quizReportScore" class="text-2xl font-bold text-[#274939]">0 / 10</div>
+          </div>
+
+          <div class="space-y-2 pt-1">
+            <div class="text-sm font-medium text-[#274939]">확인한 핵심 키워드</div>
+            <div id="quizReportKeywords" class="flex flex-wrap gap-2"></div>
+          </div>
+
+          <div class="pt-2 flex flex-wrap gap-3">
+            <button
+              id="btnGoGateFromQuiz"
+              type="button"
+              class="px-4 py-2.5 rounded-xl text-sm font-medium bg-[#2f6b50] hover:bg-[#255740] text-white transition cursor-pointer"
+            >
+              관문 테스트로 이동
+            </button>
+            <button
+              id="btnRetakeQuizFromReport"
+              type="button"
+              class="px-4 py-2.5 rounded-xl text-sm font-medium border border-[#c5d8cc] bg-white hover:bg-[#eef5f0] text-[#274939] transition cursor-pointer"
+            >
+              처음부터 다시 풀기
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- [2] 관문 테스트 뷰 -->
+    <section id="viewGate" class="hidden space-y-6">
+      <div class="bg-[#fffdf9] rounded-2xl border border-[#e5dac9] p-6 sm:p-7 space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-bold text-[#3b291e]">관문 테스트 (3단계 실습)</h2>
+            <p class="text-sm text-[#6e5a4c] mt-1">
+              목표 식감과 형태 조건에 맞게 쿠키를 구워 3단계 관문을 통과해보세요.
+            </p>
+          </div>
+          <div id="gateOverallProgress" class="text-sm font-medium text-[#5c483a]">
+            통과 관문: 0 / 3
+          </div>
+        </div>
+
+        <!-- 3단계 관문 선택 카드 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <button
+            type="button"
+            data-gate="gate1"
+            class="gate-card-btn text-left rounded-2xl border-2 border-[#7c4d2b] bg-[#faf4ec] p-5 transition cursor-pointer"
+          >
+            <div class="text-sm font-bold text-[#7c4d2b]">1단계</div>
+            <div class="text-base font-bold text-[#2f241d] mt-1">겉바속촉 기본 쿠키</div>
+            <p class="text-sm text-[#6e5a4c] mt-1.5">바삭함 40~75%, 쫀득함 25~65%, 단단함 55% 이하, 퍼짐 35~70%</p>
+            <div id="gateStatus-gate1" class="text-sm font-medium text-[#6e5a4c] mt-3">미통과</div>
+          </button>
+
+          <button
+            type="button"
+            data-gate="gate2"
+            class="gate-card-btn text-left rounded-2xl border border-[#e5dac9] bg-white hover:bg-[#faf6f0] p-5 transition cursor-pointer"
+          >
+            <div class="text-sm font-bold text-[#2f6b50]">2단계</div>
+            <div class="text-base font-bold text-[#2f241d] mt-1">퍼짐 억제 도톰 쿠키</div>
+            <p class="text-sm text-[#6e5a4c] mt-1.5">퍼짐 42% 이하, 단단함 65% 이하, 푸석함 55% 이하</p>
+            <div id="gateStatus-gate2" class="text-sm font-medium text-[#6e5a4c] mt-3">미통과</div>
+          </button>
+
+          <button
+            type="button"
+            data-gate="gate3"
+            class="gate-card-btn text-left rounded-2xl border border-[#e5dac9] bg-white hover:bg-[#faf6f0] p-5 transition cursor-pointer"
+          >
+            <div class="text-sm font-bold text-[#8f4428]">3단계</div>
+            <div class="text-base font-bold text-[#2f241d] mt-1">고소·바삭 쇼트브레드풍</div>
+            <p class="text-sm text-[#6e5a4c] mt-1.5">바삭함 60% 이상, 쫀득함 30% 이하, 푸석함 55% 이하, 퍼짐 55% 이하</p>
+            <div id="gateStatus-gate3" class="text-sm font-medium text-[#6e5a4c] mt-3">미통과</div>
+          </button>
+        </div>
+
+        <!-- 선택된 관문 안내 및 실험실 이동 -->
+        <div class="rounded-2xl border border-[#e5dac9] bg-[#faf6f0] p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div class="space-y-1">
+            <div id="activeGateTitle" class="text-base font-bold text-[#2f241d]">1단계: 겉바속촉 기본 쿠키</div>
+            <p id="activeGateDesc" class="text-sm text-[#5c483a]">
+              쿠키 실험실에서 재료를 조절하고 구운 뒤 조건을 만족하면 통과 기록이 남습니다.
+            </p>
+            <div id="activeGateBanner" class="hidden text-sm font-bold text-[#2f6b50] pt-1">
+              이 관문을 통과했습니다!
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2.5 shrink-0">
+            <button
+              id="btnPracticeInLab"
+              type="button"
+              class="px-4 py-2.5 rounded-xl text-sm font-medium bg-[#7c4d2b] hover:bg-[#663f23] text-white transition cursor-pointer"
+            >
+              실험실에서 굽기
+            </button>
+            <button
+              id="btnAdvanceGate"
+              type="button"
+              class="hidden px-4 py-2.5 rounded-xl text-sm font-medium bg-[#2f6b50] hover:bg-[#255740] text-white transition cursor-pointer"
+            >
+              다음 관문 선택
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- [3] 쿠키 실험실 뷰 (기본 표시) -->
+    <section id="viewLab" class="space-y-6">
+      <!-- 현재 선택된 관문 목표 간단 표시 바 -->
+      <div class="bg-[#fffdf9] rounded-2xl border border-[#e5dac9] px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div class="text-sm text-[#4b382b]">
+          <span class="font-bold text-[#7c4d2b]">현재 관문 목표:</span>
+          <span id="labGateGoalText" class="ml-1.5">1단계 · 겉바속촉 기본 쿠키 (바삭함 40~75%, 쫀득함 25~65%, 단단함 ≤55%, 퍼짐 35~70%)</span>
+        </div>
+        <span id="labGatePassedMark" class="hidden text-sm font-bold text-[#2f6b50]">통과 완료</span>
+      </div>
+
+      <!-- 큰 카드 2단 구조: 좌측(재료 계량 & 베이커스 퍼센트/반죽법/냉장 휴지), 우측(오븐 온도·시간 & 비율 밸런스 요약) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+
+        <!-- 좌측 큰 카드: 재료 계량 + 베이커스 퍼센트 + 반죽법 + 냉장 휴지 -->
+        <div class="bg-[#fffdf9] rounded-2xl border border-[#e5dac9] p-6 sm:p-7 space-y-6">
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <h2 class="text-xl font-bold text-[#3b291e]">재료 계량 및 반죽 공정</h2>
+              <p class="text-sm text-[#6e5a4c] mt-0.5">박력분 100% 기준 베이커스 퍼센트와 공정을 설정하세요.</p>
+            </div>
+            <button
+              id="btnResetLab"
+              type="button"
+              class="px-3.5 py-2 rounded-xl text-sm font-medium border border-[#dfd2bf] bg-[#faf6f0] hover:bg-[#efe7dc] text-[#4b382b] transition cursor-pointer"
+            >
+              기본값 복원
+            </button>
+          </div>
+
+          <!-- 재료 슬라이더 목록 (g + 베이커스 퍼센트 표시) -->
+          <div class="space-y-5">
+            <!-- 박력분 -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between text-sm">
+                <label for="inputFlour" class="font-bold text-[#2f241d]">박력분</label>
+                <span class="text-[#5c483a]">
+                  <strong id="valFlour">100</strong>g · <span id="bpFlour">100%</span>
+                </span>
+              </div>
+              <input id="inputFlour" type="range" min="50" max="180" step="5" value="100" class="clean-slider" />
+            </div>
+
+            <!-- 무염버터 -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between text-sm">
+                <label for="inputButter" class="font-bold text-[#2f241d]">무염버터</label>
+                <span class="text-[#5c483a]">
+                  <strong id="valButter">70</strong>g · <span id="bpButter">70%</span>
+                </span>
+              </div>
+              <input id="inputButter" type="range" min="20" max="140" step="5" value="70" class="clean-slider" />
+            </div>
+
+            <!-- 설탕 + 설탕 종류 -->
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between text-sm">
+                <label for="inputSugar" class="font-bold text-[#2f241d]">설탕</label>
+                <span class="text-[#5c483a]">
+                  <strong id="valSugar">55</strong>g · <span id="bpSugar">55%</span>
+                </span>
+              </div>
+              <input id="inputSugar" type="range" min="10" max="130" step="5" value="55" class="clean-slider" />
+              <div class="grid grid-cols-2 gap-2.5 pt-1">
+                <button
+                  type="button"
+                  data-sugar="white"
+                  class="sugar-btn py-2.5 px-3 rounded-xl text-sm font-medium border border-[#7c4d2b] bg-[#faf4ec] text-[#3b291e] transition cursor-pointer"
+                >
+                  백설탕 위주
+                </button>
+                <button
+                  type="button"
+                  data-sugar="brown"
+                  class="sugar-btn py-2.5 px-3 rounded-xl text-sm font-medium border border-[#dfd2bf] bg-white text-[#5c483a] hover:bg-[#faf6f0] transition cursor-pointer"
+                >
+                  흑설탕 위주
+                </button>
+              </div>
+            </div>
+
+            <!-- 달걀 -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between text-sm">
+                <label for="inputEgg" class="font-bold text-[#2f241d]">달걀</label>
+                <span class="text-[#5c483a]">
+                  <strong id="valEgg">25</strong>g · <span id="bpEgg">25%</span>
+                </span>
+              </div>
+              <input id="inputEgg" type="range" min="0" max="70" step="5" value="25" class="clean-slider" />
+            </div>
+          </div>
+
+          <hr class="border-[#ede3d5]" />
+
+          <!-- 반죽법 선택 -->
+          <div class="space-y-2.5">
+            <div class="text-sm font-bold text-[#2f241d]">반죽법</div>
+            <div class="grid grid-cols-2 gap-2.5">
+              <button
+                type="button"
+                data-method="creaming"
+                class="method-btn py-2.5 px-3 rounded-xl text-sm font-medium border border-[#7c4d2b] bg-[#faf4ec] text-[#3b291e] transition cursor-pointer"
+              >
+                크리밍법
+              </button>
+              <button
+                type="button"
+                data-method="blending"
+                class="method-btn py-2.5 px-3 rounded-xl text-sm font-medium border border-[#dfd2bf] bg-white text-[#5c483a] hover:bg-[#faf6f0] transition cursor-pointer"
+              >
+                블렌딩법
+              </button>
+            </div>
+            <p id="methodNoteText" class="text-sm text-[#6e5a4c]">
+              버터와 설탕을 치대어 공기를 포집하고 부드러운 조직을 만듭니다.
+            </p>
+          </div>
+
+          <!-- 냉장 휴지 선택 -->
+          <div class="space-y-2.5">
+            <div class="text-sm font-bold text-[#2f241d]">냉장 휴지</div>
+            <div class="grid grid-cols-3 gap-2.5">
+              <button
+                type="button"
+                data-chill="none"
+                class="chill-btn py-2.5 px-3 rounded-xl text-sm font-medium border border-[#dfd2bf] bg-white text-[#5c483a] hover:bg-[#faf6f0] transition cursor-pointer"
+              >
+                없음
+              </button>
+              <button
+                type="button"
+                data-chill="30m"
+                class="chill-btn py-2.5 px-3 rounded-xl text-sm font-medium border border-[#7c4d2b] bg-[#faf4ec] text-[#3b291e] transition cursor-pointer"
+              >
+                30분
+              </button>
+              <button
+                type="button"
+                data-chill="1h"
+                class="chill-btn py-2.5 px-3 rounded-xl text-sm font-medium border border-[#dfd2bf] bg-white text-[#5c483a] hover:bg-[#faf6f0] transition cursor-pointer"
+              >
+                1시간 이상
+              </button>
+            </div>
+            <p id="chillNoteText" class="text-sm text-[#6e5a4c]">
+              버터가 적당히 굳고 수분이 고르게 퍼져 퍼짐을 안정시킵니다.
+            </p>
+          </div>
+        </div>
+
+        <!-- 우측 큰 카드: 오븐 온도·시간 설정 + 비율 밸런스 요약 -->
+        <div class="bg-[#fffdf9] rounded-2xl border border-[#e5dac9] p-6 sm:p-7 space-y-6">
+          <div>
+            <h2 class="text-xl font-bold text-[#3b291e]">오븐 조건 및 비율 밸런스</h2>
+            <p class="text-sm text-[#6e5a4c] mt-0.5">굽기 온도와 시간을 정하고 현재 배합의 균형을 확인하세요.</p>
+          </div>
+
+          <!-- 오븐 온도 & 굽기 시간 -->
+          <div class="space-y-5">
+            <div class="space-y-2">
+              <div class="flex items-center justify-between text-sm">
+                <label for="inputTemp" class="font-bold text-[#2f241d]">오븐 온도</label>
+                <span class="font-bold text-[#3b291e]"><span id="valTemp">170</span>℃</span>
+              </div>
+              <input id="inputTemp" type="range" min="140" max="210" step="5" value="170" class="clean-slider" />
+            </div>
+
+            <div class="space-y-2">
+              <div class="flex items-center justify-between text-sm">
+                <label for="inputTime" class="font-bold text-[#2f241d]">굽기 시간</label>
+                <span class="font-bold text-[#3b291e]"><span id="valTime">12</span>분</span>
+              </div>
+              <input id="inputTime" type="range" min="6" max="22" step="1" value="12" class="clean-slider" />
+            </div>
+          </div>
+
+          <hr class="border-[#ede3d5]" />
+
+          <!-- 비율 밸런스 요약 -->
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-base font-bold text-[#2f241d]">비율 밸런스 요약</h3>
+              <span class="text-sm text-[#5c483a]">총 반죽량: <strong id="totalWeightLabel">250</strong>g</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3.5">
+              <div class="rounded-xl bg-[#faf6f0] border border-[#e9dfd0] p-4">
+                <div class="text-sm text-[#6e5a4c]">지방 비율 (버터/박력분)</div>
+                <div id="balanceFatText" class="text-base font-bold text-[#2f241d] mt-1">70% · 적정</div>
+              </div>
+              <div class="rounded-xl bg-[#faf6f0] border border-[#e9dfd0] p-4">
+                <div class="text-sm text-[#6e5a4c]">당 비율 (설탕/박력분)</div>
+                <div id="balanceSugarText" class="text-base font-bold text-[#2f241d] mt-1">55% · 적정</div>
+              </div>
+              <div class="rounded-xl bg-[#faf6f0] border border-[#e9dfd0] p-4">
+                <div class="text-sm text-[#6e5a4c]">수분·유화 (달걀/박력분)</div>
+                <div id="balanceEggText" class="text-base font-bold text-[#2f241d] mt-1">25% · 적정</div>
+              </div>
+              <div class="rounded-xl bg-[#faf6f0] border border-[#e9dfd0] p-4">
+                <div class="text-sm text-[#6e5a4c]">열 조건 (온도·시간)</div>
+                <div id="balanceHeatText" class="text-base font-bold text-[#2f241d] mt-1">170℃ / 12분 · 표준</div>
+              </div>
+            </div>
+
+            <p id="balanceSummarySentence" class="text-sm text-[#4b382b] leading-relaxed bg-[#faf6f0] rounded-xl p-4 border border-[#e9dfd0]">
+              박력분 대비 지방과 당의 비율이 고르게 잡혀 있어 기본적인 쿠키 식감을 내기 좋은 상태입니다.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 하단 영역: 굽기 버튼 + 시각적 쿠키 미리보기 및 결과 과학 리포트 -->
+      <div class="bg-[#fffdf9] rounded-2xl border border-[#e5dac9] p-6 sm:p-7 space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-[#3b291e]">오븐 굽기 및 결과 리포트</h2>
+            <p id="bakeStatusText" class="text-sm text-[#6e5a4c] mt-0.5">
+              설정한 배합으로 구워 쿠키의 퍼짐·단면·식감과 과학 원리를 확인하세요.
+            </p>
+          </div>
+          <button
+            id="btnBakeCookie"
+            type="button"
+            class="px-6 py-3 rounded-xl text-base font-bold bg-[#7c4d2b] hover:bg-[#663f23] text-white transition cursor-pointer shrink-0"
+          >
+            오븐에 굽기
+          </button>
+        </div>
+
+        <!-- 굽기 진행 바 -->
+        <div class="w-full h-2.5 rounded-full bg-[#ece2d3] overflow-hidden">
+          <div id="bakeBarFill" class="h-full bg-[#c96a38] transition-all duration-150" style="width: 0%;"></div>
+        </div>
+
+        <!-- 시각적 쿠키 미리보기 + 식감 수치 + 과학 리포트 2단 -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start pt-1">
+
+          <!-- 왼쪽(5칸): 위에서 본 모습 & 단면 시각적 미리보기 -->
+          <div class="lg:col-span-5 rounded-2xl border border-[#e9dfd0] bg-[#faf6f0] p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 id="resultTitleText" class="text-lg font-bold text-[#2f241d]">기본 밸런스 쿠키</h3>
+              <span id="resultCategoryText" class="text-sm font-medium text-[#7c4d2b]">표준 식감</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <!-- 탑뷰 SVG -->
+              <div class="bg-white rounded-xl border border-[#e6dcd0] p-3 flex flex-col items-center">
+                <span class="text-sm font-medium text-[#5c483a] mb-1">위에서 본 모습</span>
+                <svg viewBox="0 0 180 120" class="w-full h-28">
+                  <ellipse cx="90" cy="64" rx="72" ry="42" fill="none" stroke="#dfd2bf" stroke-dasharray="4 4" />
+                  <g transform="translate(90, 64)">
+                    <ellipse id="svgTopEllipse" cx="0" cy="0" rx="44" ry="34" fill="#d99b52" stroke="#7c4d2b" stroke-width="2" />
+                    <circle cx="-13" cy="-8" r="3.8" fill="#472b18" />
+                    <circle cx="12" cy="-10" r="3.5" fill="#472b18" />
+                    <circle cx="4" cy="9" r="4" fill="#472b18" />
+                    <circle cx="-15" cy="10" r="3.2" fill="#472b18" />
+                  </g>
+                </svg>
+                <span id="metricSpreadLabel" class="text-sm text-[#4b382b] mt-1">퍼짐 48%</span>
+              </div>
+
+              <!-- 단면 SVG -->
+              <div class="bg-white rounded-xl border border-[#e6dcd0] p-3 flex flex-col items-center">
+                <span class="text-sm font-medium text-[#5c483a] mb-1">단면 두께</span>
+                <svg viewBox="0 0 180 120" class="w-full h-28">
+                  <line x1="18" y1="96" x2="162" y2="96" stroke="#c8b79f" stroke-width="3" stroke-linecap="round" />
+                  <path
+                    id="svgSidePath"
+                    d="M 38 96 Q 38 62 90 62 Q 142 62 142 96 Z"
+                    fill="#e3ab64"
+                    stroke="#7c4d2b"
+                    stroke-width="2"
+                  />
+                </svg>
+                <span id="metricBrowningLabel" class="text-sm text-[#4b382b] mt-1">갈변 50%</span>
+              </div>
+            </div>
+
+            <!-- 주요 식감 4항목 깔끔 표시 -->
+            <div class="grid grid-cols-2 gap-2.5 pt-1 text-sm">
+              <div class="bg-white rounded-xl border border-[#e6dcd0] px-3.5 py-2.5 flex justify-between">
+                <span class="text-[#6e5a4c]">바삭함</span>
+                <strong id="valCrispy" class="text-[#2f241d]">52%</strong>
+              </div>
+              <div class="bg-white rounded-xl border border-[#e6dcd0] px-3.5 py-2.5 flex justify-between">
+                <span class="text-[#6e5a4c]">쫀득함</span>
+                <strong id="valChewy" class="text-[#2f241d]">44%</strong>
+              </div>
+              <div class="bg-white rounded-xl border border-[#e6dcd0] px-3.5 py-2.5 flex justify-between">
+                <span class="text-[#6e5a4c]">푸석함</span>
+                <strong id="valCrumbly" class="text-[#2f241d]">28%</strong>
+              </div>
+              <div class="bg-white rounded-xl border border-[#e6dcd0] px-3.5 py-2.5 flex justify-between">
+                <span class="text-[#6e5a4c]">단단함</span>
+                <strong id="valHard" class="text-[#2f241d]">36%</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- 오른쪽(7칸): 결과 과학 리포트 -->
+          <div class="lg:col-span-7 rounded-2xl border border-[#e9dfd0] bg-[#faf6f0] p-5 space-y-4">
+            <h3 class="text-lg font-bold text-[#2f241d]">과학 리포트</h3>
+            <p id="resultSummaryText" class="text-sm font-medium text-[#3b291e] leading-relaxed">
+              버튼을 눌러 구워보면 현재 배합과 공정에 따른 식감 원인을 분석해 드립니다.
+            </p>
+            <div id="scienceReportList" class="space-y-3"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- [4] 실험 도감 뷰 -->
+    <section id="viewDex" class="hidden space-y-6">
+      <div class="bg-[#fffdf9] rounded-2xl border border-[#e5dac9] p-6 sm:p-7 space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-bold text-[#3b291e]">쿠키 실험 도감</h2>
+            <p class="text-sm text-[#6e5a4c] mt-1">
+              다양한 비율과 온도로 구워서 특징 쿠키를 모아보세요.
+            </p>
+          </div>
+          <div class="flex items-center gap-3">
+            <span id="dexCountLabel" class="text-sm font-medium text-[#5c483a]">수집 0 / 6</span>
+            <button
+              id="btnResetDex"
+              type="button"
+              class="px-3.5 py-2 rounded-xl text-sm font-medium border border-[#dfd2bf] bg-[#faf6f0] hover:bg-[#efe7dc] text-[#4b382b] transition cursor-pointer"
+            >
+              도감 초기화
+            </button>
+          </div>
+        </div>
+
+        <div id="dexGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 화면 하단 간결한 알림 메시지 -->
+  <div
+    id="toastBanner"
+    class="hidden fixed bottom-5 right-5 z-50 rounded-xl bg-[#2f241d] text-white px-4 py-3 text-sm font-medium shadow-lg"
+  ></div>
+
+  <script>
+    /**
+     * 제과제빵 학원 예습용 쿠키 과학 실험실 스크립트
+     * - 기초 10문제 퀴즈, 3단계 관문 테스트, 쿠키 실험실, 실험 도감 관리
+     */
+
+    const DEFAULT_RECIPE = {
+      flour: 100,
+      butter: 70,
+      sugar: 55,
+      sugarType: 'white',
+      egg: 25,
+      method: 'creaming',
+      chill: '30m',
+      temp: 170,
+      time: 12
+    };
+
+    const QUIZ_DATA = [
+      {
+        id: 1,
+        topic: '베이커스 퍼센트',
+        keyword: '밀가루 = 100% 기준',
+        question: '베이커스 퍼센트에서 100%로 잡는 기준 재료는 무엇일까요?',
+        choices: ['전체 반죽 무게', '밀가루 무게', '버터 무게', '설탕 무게'],
+        answer: 1,
+        explanation: '제과제빵에서는 밀가루 무게를 100%로 두고 각 재료의 비율을 계산합니다. 레시피 양을 늘리거나 줄일 때 기준이 됩니다.'
+      },
+      {
+        id: 2,
+        topic: '글루텐 형성',
+        keyword: '과도한 치댐 주의',
+        question: '쿠키 반죽을 너무 오래 치대면 어떤 식감이 나오기 쉬울까요?',
+        choices: ['더 촉촉하고 부드러워진다', '글루텐이 생겨 단단하거나 질겨진다', '설탕이 모두 녹아 사라진다', '크기가 절반으로 줄어든다'],
+        answer: 1,
+        explanation: '밀가루 단백질이 수분을 만나 글루텐을 형성합니다. 쿠키는 과도한 글루텐이 생기면 단단하거나 질길 수 있습니다.'
+      },
+      {
+        id: 3,
+        topic: '단축 작용',
+        keyword: '지방의 코팅 효과',
+        question: '버터 같은 지방이 밀가루 입자를 감싸 글루텐 형성을 막아주는 작용은 무엇인가요?',
+        choices: ['단축 작용', '발효 작용', '호화 작용', '응고 작용'],
+        answer: 0,
+        explanation: '지방이 밀가루 입자를 둘러싸면 글루텐 망이 과하게 촘촘해지는 것을 막아 바삭하고 부서지는 식감을 돕습니다.'
+      },
+      {
+        id: 4,
+        topic: '크리밍법',
+        keyword: '공기 포집과 유화',
+        question: '크리밍법에서 버터와 설탕을 함께 치댈 때 기대할 수 있는 효과는 무엇인가요?',
+        choices: ['미세한 공기를 포집해 부드러운 조직을 돕는다', '수분이 모두 날아가 딱딱해진다', '오븐 열이 필요 없어진다', '전분이 소금으로 바뀐다'],
+        answer: 0,
+        explanation: '버터와 설탕을 치대면 작은 기포가 들어가고 유화가 일어나 쿠키 조직을 부드럽고 고르게 만드는 데 도움이 됩니다.'
+      },
+      {
+        id: 5,
+        topic: '블렌딩법',
+        keyword: '고소하고 바삭한 결',
+        question: '블렌딩법은 주로 어떤 느낌의 쿠키를 만들 때 활용하기 좋을까요?',
+        choices: ['고소하고 깔끔하게 부서지는 식감', '발효빵처럼 길게 늘어나는 식감', '물처럼 흐르는 반죽', '거품만 있는 머랭'],
+        answer: 0,
+        explanation: '블렌딩법은 지방을 가루와 먼저 고르게 섞어 쇼트브레드처럼 고소하고 바삭·부서지는 식감을 내기 좋습니다.'
+      },
+      {
+        id: 6,
+        topic: '퍼짐 원리',
+        keyword: '버터·설탕과 퍼짐',
+        question: '박력분에 비해 버터와 설탕 비율이 높으면 오븐에서 어떻게 되기 쉬울까요?',
+        choices: ['넓게 퍼지며 가장자리가 바삭해진다', '위로만 뾰족하게 솟는다', '무게가 0g이 된다', '색이 파래진다'],
+        answer: 0,
+        explanation: '열을 받으면 버터가 녹고 설탕이 녹아 반죽이 옆으로 퍼집니다. 퍼짐을 줄이려면 휴지나 밀가루 비율을 조절해야 합니다.'
+      },
+      {
+        id: 7,
+        topic: '흑설탕의 특징',
+        keyword: '당밀과 쫀득함',
+        question: '백설탕 대신 흑설탕 비중을 높이면 주로 어떤 특징이 살아날까요?',
+        choices: ['당밀과 수분 덕분에 쫀득하고 풍미가 진해진다', '단맛이 완전히 사라진다', '유리처럼 투명해진다', '온도를 100℃로 내려야 한다'],
+        answer: 0,
+        explanation: '흑설탕에는 당밀과 수분이 남아 있어 수분을 잡아두는 힘이 크고, 촉촉·쫀득한 식감과 깊은 색을 냅니다.'
+      },
+      {
+        id: 8,
+        topic: '달걀의 역할',
+        keyword: '수분과 유화 작용',
+        question: '쿠키 반죽에서 달걀이 하는 역할로 알맞은 것은 무엇일까요?',
+        choices: ['수분 공급과 유화 작용으로 조직을 이어준다', '오븐 열을 차단한다', '철판에 반죽을 붙게 만든다', '밀가루를 물로 바꾼다'],
+        answer: 0,
+        explanation: '달걀은 수분과 지방, 유화 성분(레시틴), 단백질을 갖추어 반죽의 균형과 부드러움에 기여합니다.'
+      },
+      {
+        id: 9,
+        topic: '냉장 휴지(칠링)',
+        keyword: '퍼짐 억제와 안정',
+        question: '굽기 전에 반죽을 냉장 휴지시키는 주된 이유는 무엇일까요?',
+        choices: ['버터를 차갑게 굳혀 급격한 퍼짐을 줄인다', '반죽을 뜨겁게 데우기 위해서다', '설탕을 돌처럼 만들기 위해서다', '계란을 삶기 위해서다'],
+        answer: 0,
+        explanation: '냉장 휴지를 거치면 버터가 단단해져 오븐에 들어간 직후 지나치게 퍼지는 것을 막고 수분이 고르게 퍼집니다.'
+      },
+      {
+        id: 10,
+        topic: '오븐 온도와 시간',
+        keyword: '갈변과 수분 증발',
+        question: '오븐 온도가 너무 높거나 굽기 시간이 너무 길면 어떤 일이 생길까요?',
+        choices: ['갈변이 과해지고 수분이 빠져 딱딱하거나 탄다', '반죽이 얼어붙는다', '쿠키가 사라진다', '생밀가루로 돌아간다'],
+        answer: 0,
+        explanation: '온도와 시간이 과하면 갈변이 지나치게 진행되고 내부 수분이 많이 빠져나가 단단하거나 탄 쿠키가 됩니다.'
+      }
+    ];
+
+    const GATES = {
+      gate1: {
+        title: '1단계: 겉바속촉 기본 쿠키',
+        shortGoal: '1단계 · 겉바속촉 기본 쿠키 (바삭함 40~75%, 쫀득함 25~65%, 단단함 ≤55%, 퍼짐 35~70%)',
+        desc: '바삭함 40~75%, 쫀득함 25~65%, 단단함 55% 이하, 퍼짐 35~70%를 맞추면 통과합니다.',
+        check: (m) =>
+          m.crispy >= 40 && m.crispy <= 75 &&
+          m.chewy >= 25 && m.chewy <= 65 &&
+          m.hard <= 55 &&
+          m.spread >= 35 && m.spread <= 70
+      },
+      gate2: {
+        title: '2단계: 퍼짐 억제 도톰 쿠키',
+        shortGoal: '2단계 · 퍼짐 억제 도톰 쿠키 (퍼짐 ≤42%, 단단함 ≤65%, 푸석함 ≤55%)',
+        desc: '냉장 휴지와 배합 조절로 퍼짐 42% 이하, 단단함 65% 이하, 푸석함 55% 이하를 만들어보세요.',
+        check: (m) => m.spread <= 42 && m.hard <= 65 && m.crumbly <= 55
+      },
+      gate3: {
+        title: '3단계: 고소·바삭 쇼트브레드풍',
+        shortGoal: '3단계 · 고소·바삭 쇼트브레드풍 (바삭함 ≥60%, 쫀득함 ≤30%, 푸석함 ≤55%, 퍼짐 ≤55%)',
+        desc: '바삭함 60% 이상, 쫀득함 30% 이하, 푸석함 55% 이하, 퍼짐 55% 이하 조건을 달성하세요.',
+        check: (m) => m.crispy >= 60 && m.chewy <= 30 && m.crumbly <= 55 && m.spread <= 55
+      }
+    };
+
+    const DEX_ITEMS = [
+      { id: 'balanced', name: '기본 밸런스 쿠키', desc: '재료 비율과 휴지·온도가 고르게 조화된 기본 쿠키' },
+      { id: 'wide', name: '넓게 퍼진 쿠키', desc: '버터·설탕 비율이 높거나 휴지가 적어 넓게 퍼진 쿠키' },
+      { id: 'hard', name: '단단한 쿠키', desc: '밀가루 비중이 높거나 과하게 구워져 단단해진 쿠키' },
+      { id: 'crumbly', name: '푸석한 쿠키', desc: '수분과 지방에 비해 박력분이 많아 푸석한 쿠키' },
+      { id: 'chewy', name: '쫀득한 캐러멜 쿠키', desc: '흑설탕과 수분·당화 작용으로 쫀득한 식감이 난 쿠키' },
+      { id: 'burnt', name: '진하게 구워진 쿠키', desc: '온도나 시간이 높아 갈변이 진하게 진행된 쿠키' }
+    ];
+
+    // 상태 변수
+    let recipe = { ...DEFAULT_RECIPE };
+    let currentView = 'lab'; // 'quiz' | 'gate' | 'lab' | 'dex'
+    let activeGate = 'gate1';
+    let passedGates = new Set();
+    let collectedDex = new Set();
+    let isBaking = false;
+
+    // 퀴즈 상태
+    let quizIndex = 0;
+    let quizAnswers = {};
+    let quizFinished = false;
+    let quizKeywords = new Set();
+
+    function clamp(v, min, max) {
+      return Math.max(min, Math.min(max, v));
+    }
+
+    let toastTimer = null;
+    function showToast(text) {
+      const el = document.getElementById('toastBanner');
+      el.textContent = text;
+      el.classList.remove('hidden');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.add('hidden'), 2500);
+    }
+
+    /**
+     * 쿠키 배합 및 공정 시뮬레이션 계산
+     */
+    function analyzeRecipe(r) {
+      const total = Math.max(1, r.flour + r.butter + r.sugar + r.egg);
+      const flourR = r.flour / total;
+      const butterR = r.butter / total;
+      const sugarR = r.sugar / total;
+      const eggR = r.egg / total;
+
+      const isBrown = r.sugarType === 'brown';
+      const isBlending = r.method === 'blending';
+      const chillSpread = r.chill === 'none' ? 14 : (r.chill === '30m' ? 0 : -11);
+      const tempStep = (r.temp - 170) / 10;
+      const timeStep = r.time - 12;
+
+      const spread = Math.round(clamp(
+        48 +
+        (butterR - 0.28) * 140 +
+        (sugarR - 0.22) * 90 +
+        (eggR - 0.10) * 50 -
+        (flourR - 0.40) * 105 +
+        chillSpread +
+        (isBlending ? -4 : 2) +
+        tempStep * 2.2,
+        12,
+        96
+      ));
+
+      const browning = Math.round(clamp(
+        50 +
+        (sugarR - 0.22) * 80 +
+        (isBrown ? 12 : 0) +
+        tempStep * 8.5 +
+        timeStep * 3.5,
+        15,
+        100
+      ));
+
+      const crispy = Math.round(clamp(
+        52 +
+        (sugarR - 0.22) * 88 +
+        (butterR - 0.28) * 62 -
+        (isBrown ? 10 : 0) -
+        eggR * 70 +
+        (isBlending ? 7 : -2) +
+        timeStep * 2.6 +
+        tempStep * 2.0,
+        12,
+        95
+      ));
+
+      const chewy = Math.round(clamp(
+        35 +
+        (isBrown ? 24 : 0) +
+        eggR * 90 +
+        (sugarR - 0.22) * 42 -
+        (flourR - 0.40) * 55 -
+        (isBlending ? 5 : 0) -
+        Math.max(0, timeStep - 2) * 3.5,
+        10,
+        95
+      ));
+
+      const crumbly = Math.round(clamp(
+        30 +
+        (flourR - 0.40) * 150 -
+        (butterR - 0.28) * 80 -
+        eggR * 75 -
+        (isBrown ? 12 : 0) +
+        Math.max(0, timeStep - 3) * 2.2,
+        10,
+        95
+      ));
+
+      const hard = Math.round(clamp(
+        36 +
+        (flourR - 0.40) * 130 -
+        (butterR - 0.28) * 70 +
+        (isBlending ? -3 : 0) +
+        Math.max(0, timeStep) * 3.2 +
+        Math.max(0, tempStep) * 3.5 -
+        (r.chill === '1h' ? 4 : 0),
+        12,
+        96
+      ));
+
+      let dexId = 'balanced';
+      let title = '기본 밸런스 쿠키';
+      let category = '표준 식감';
+      let summary = '재료 비율과 공정 조건이 무난하게 어우러진 쿠키입니다.';
+
+      if (browning >= 84 || (r.temp >= 200 && r.time >= 15)) {
+        dexId = 'burnt';
+        title = '진하게 구워진 쿠키';
+        category = '갈변 높음';
+        summary = '온도나 굽기 시간이 높아 색이 짙어지고 수분이 줄어들었습니다.';
+      } else if (hard >= 72) {
+        dexId = 'hard';
+        title = '단단한 쿠키';
+        category = '단단함 높음';
+        summary = '밀가루 구조가 강하거나 굽기 열이 누적되어 단단한 식감이 나타났습니다.';
+      } else if (crumbly >= 66 && chewy < 45) {
+        dexId = 'crumbly';
+        title = '푸석한 쿠키';
+        category = '푸석함 높음';
+        summary = '수분과 지방에 비해 박력분 비율이 커서 입안에서 푸석이는 느낌입니다.';
+      } else if (chewy >= 64 && isBrown) {
+        dexId = 'chewy';
+        title = '쫀득한 캐러멜 쿠키';
+        category = '쫀득·풍미';
+        summary = '흑설탕의 당밀과 수분 유지 덕분에 쫀득하고 진한 풍미가 살아났습니다.';
+      } else if (spread >= 70) {
+        dexId = 'wide';
+        title = '넓게 퍼진 쿠키';
+        category = '퍼짐 큼';
+        summary = '버터·설탕 비율이나 휴지 부족으로 반죽이 옆으로 넓게 퍼졌습니다.';
+      }
+
+      const reports = [
+        {
+          heading: '밀가루·지방 비율',
+          text: butterR > 0.34
+            ? '버터 비율이 높아 반죽이 부드럽고 퍼짐이 커지기 쉽습니다. 퍼짐을 줄이려면 냉장 휴지를 늘리거나 박력분을 늘려보세요.'
+            : flourR > 0.48
+              ? '박력분 비율이 높아 구조가 단단해지고 푸석하거나 퍽퍽해질 수 있습니다.'
+              : '박력분과 버터의 균형이 적당해 과도한 치댐 없이 식감을 잡기 좋습니다.'
+        },
+        {
+          heading: '반죽법과 냉장 휴지',
+          text: `${isBlending ? '블렌딩법' : '크리밍법'}과 ${r.chill === 'none' ? '휴지 없음' : r.chill === '30m' ? '30분 냉장 휴지' : '1시간 이상 냉장 휴지'} 조합입니다. 휴지를 주면 버터가 단단해져 퍼짐을 안정시키는 데 도움이 됩니다.`
+        },
+        {
+          heading: '설탕과 오븐 열 조건',
+          text: `${isBrown ? '흑설탕' : '백설탕'} ${r.sugar}g을 ${r.temp}℃에서 ${r.time}분 구웠습니다. ${r.temp >= 195 || r.time >= 17 ? '열과 시간이 높은 편이라 갈변과 수분 증발이 빨라집니다.' : '온도와 시간이 과도하지 않아 색과 식감을 조절하기 수월합니다.'}`
+        }
+      ];
+
+      return {
+        total,
+        dexId,
+        title,
+        category,
+        summary,
+        browning,
+        metrics: { spread, crispy, chewy, crumbly, hard },
+        reports
+      };
+    }
+
+    /**
+     * 밸런스 요약 및 쿠키 시각 프리뷰 갱신
+     */
+    function renderLabPreview(progress = 1) {
+      const flourBase = Math.max(1, recipe.flour);
+      const bpButter = Math.round((recipe.butter / flourBase) * 100);
+      const bpSugar = Math.round((recipe.sugar / flourBase) * 100);
+      const bpEgg = Math.round((recipe.egg / flourBase) * 100);
+      const total = recipe.flour + recipe.butter + recipe.sugar + recipe.egg;
+
+      document.getElementById('valFlour').textContent = recipe.flour;
+      document.getElementById('bpFlour').textContent = '100%';
+      document.getElementById('valButter').textContent = recipe.butter;
+      document.getElementById('bpButter').textContent = `${bpButter}%`;
+      document.getElementById('valSugar').textContent = recipe.sugar;
+      document.getElementById('bpSugar').textContent = `${bpSugar}%`;
+      document.getElementById('valEgg').textContent = recipe.egg;
+      document.getElementById('bpEgg').textContent = `${bpEgg}%`;
+      document.getElementById('valTemp').textContent = recipe.temp;
+      document.getElementById('valTime').textContent = recipe.time;
+      document.getElementById('totalWeightLabel').textContent = total;
+
+      // 설탕·반죽법·휴지 버튼 활성 상태
+      document.querySelectorAll('.sugar-btn').forEach((btn) => {
+        const active = btn.dataset.sugar === recipe.sugarType;
+        btn.className = active
+          ? 'sugar-btn py-2.5 px-3 rounded-xl text-sm font-medium border border-[#7c4d2b] bg-[#faf4ec] text-[#3b291e] transition cursor-pointer'
+          : 'sugar-btn py-2.5 px-3 rounded-xl text-sm font-medium border border-[#dfd2bf] bg-white text-[#5c483a] hover:bg-[#faf6f0] transition cursor-pointer';
+      });
+
+      document.querySelectorAll('.method-btn').forEach((btn) => {
+        const active = btn.dataset.method === recipe.method;
+        btn.className = active
+          ? 'method-btn py-2.5 px-3 rounded-xl text-sm font-medium border border-[#7c4d2b] bg-[#faf4ec] text-[#3b291e] transition cursor-pointer'
+          : 'method-btn py-2.5 px-3 rounded-xl text-sm font-medium border border-[#dfd2bf] bg-white text-[#5c483a] hover:bg-[#faf6f0] transition cursor-pointer';
+      });
+
+      document.querySelectorAll('.chill-btn').forEach((btn) => {
+        const active = btn.dataset.chill === recipe.chill;
+        btn.className = active
+          ? 'chill-btn py-2.5 px-3 rounded-xl text-sm font-medium border border-[#7c4d2b] bg-[#faf4ec] text-[#3b291e] transition cursor-pointer'
+          : 'chill-btn py-2.5 px-3 rounded-xl text-sm font-medium border border-[#dfd2bf] bg-white text-[#5c483a] hover:bg-[#faf6f0] transition cursor-pointer';
+      });
+
+      document.getElementById('methodNoteText').textContent =
+        recipe.method === 'creaming'
+          ? '버터와 설탕을 치대어 공기를 포집하고 부드러운 조직을 만듭니다.'
+          : '밀가루에 지방을 먼저 고르게 섞어 고소하고 바삭한 결을 살립니다.';
+
+      document.getElementById('chillNoteText').textContent =
+        recipe.chill === 'none'
+          ? '휴지 없이 바로 구워 오븐에서 반죽이 빠르게 퍼질 수 있습니다.'
+          : recipe.chill === '30m'
+            ? '버터가 적당히 굳고 수분이 고르게 퍼져 퍼짐을 안정시킵니다.'
+            : '충분한 냉장 휴지로 퍼짐을 크게 줄이고 도톰한 형태를 돕습니다.';
+
+      // 밸런스 요약 카드
+      document.getElementById('balanceFatText').textContent =
+        `${bpButter}% · ${bpButter > 85 ? '높음' : bpButter < 45 ? '낮음' : '적정'}`;
+      document.getElementById('balanceSugarText').textContent =
+        `${bpSugar}% · ${bpSugar > 75 ? '높음' : bpSugar < 35 ? '낮음' : '적정'}`;
+      document.getElementById('balanceEggText').textContent =
+        `${bpEgg}% · ${bpEgg > 40 ? '높음' : bpEgg < 10 ? '적음' : '적정'}`;
+      document.getElementById('balanceHeatText').textContent =
+        `${recipe.temp}℃ / ${recipe.time}분 · ${recipe.temp >= 195 || recipe.time >= 17 ? '강한 열' : recipe.temp <= 150 ? '낮은 열' : '표준'}`;
+
+      const analysis = analyzeRecipe(recipe);
+      document.getElementById('balanceSummarySentence').textContent = analysis.summary;
+
+      // 쿠키 SVG & 수치 갱신
+      const p = clamp(progress, 0.2, 1);
+      const spreadFactor = (analysis.metrics.spread / 100) * p;
+      const brownFactor = (analysis.browning / 100) * p;
+      const rx = Math.round(36 + spreadFactor * 36);
+      const ry = Math.round(28 + spreadFactor * 16);
+      const rCol = Math.round(236 - brownFactor * 95);
+      const gCol = Math.round(192 - brownFactor * 115);
+      const bCol = Math.round(128 - brownFactor * 90);
+      const fillRgb = `rgb(${rCol}, ${gCol}, ${bCol})`;
+
+      const topEl = document.getElementById('svgTopEllipse');
+      topEl.setAttribute('rx', rx);
+      topEl.setAttribute('ry', ry);
+      topEl.setAttribute('fill', fillRgb);
+
+      const heightPx = Math.round(clamp(38 - spreadFactor * 20, 16, 40) * (0.65 + 0.35 * p));
+      const topY = 96 - heightPx;
+      const sidePath = document.getElementById('svgSidePath');
+      sidePath.setAttribute('d', `M 38 96 Q 38 ${topY} 90 ${topY} Q 142 ${topY} 142 96 Z`);
+      sidePath.setAttribute('fill', fillRgb);
+
+      document.getElementById('resultTitleText').textContent = analysis.title;
+      document.getElementById('resultCategoryText').textContent = analysis.category;
+      document.getElementById('metricSpreadLabel').textContent = `퍼짐 ${analysis.metrics.spread}%`;
+      document.getElementById('metricBrowningLabel').textContent = `갈변 ${analysis.browning}%`;
+      document.getElementById('valCrispy').textContent = `${analysis.metrics.crispy}%`;
+      document.getElementById('valChewy').textContent = `${analysis.metrics.chewy}%`;
+      document.getElementById('valCrumbly').textContent = `${analysis.metrics.crumbly}%`;
+      document.getElementById('valHard').textContent = `${analysis.metrics.hard}%`;
+      document.getElementById('resultSummaryText').textContent = analysis.summary;
+
+      document.getElementById('scienceReportList').innerHTML = analysis.reports
+        .map(
+          (item) => `
+            <div class="rounded-xl bg-white border border-[#e6dcd0] p-4 space-y-1">
+              <div class="text-sm font-bold text-[#3b291e]">${item.heading}</div>
+              <p class="text-sm text-[#5c483a] leading-relaxed">${item.text}</p>
+            </div>
+          `
+        )
+        .join('');
+
+      // 현재 관문 목표 표시 갱신
+      const g = GATES[activeGate];
+      document.getElementById('labGateGoalText').textContent = g.shortGoal;
+      document.getElementById('labGatePassedMark').classList.toggle('hidden', !passedGates.has(activeGate));
+    }
+
+    /**
+     * 굽기 실행
+     */
+    function startBaking() {
+      if (isBaking) return;
+      isBaking = true;
+
+      const btn = document.getElementById('btnBakeCookie');
+      const bar = document.getElementById('bakeBarFill');
+      const status = document.getElementById('bakeStatusText');
+      btn.disabled = true;
+      btn.classList.add('opacity-60');
+      status.textContent = '오븐에서 굽는 중입니다...';
+
+      const duration = 900;
+      const start = performance.now();
+
+      function tick(now) {
+        const ratio = Math.min(1, (now - start) / duration);
+        bar.style.width = `${Math.round(ratio * 100)}%`;
+        renderLabPreview(ratio);
+
+        if (ratio < 1) {
+          requestAnimationFrame(tick);
+        } else {
+          isBaking = false;
+          btn.disabled = false;
+          btn.classList.remove('opacity-60');
+          status.textContent = `굽기 완료 (${recipe.temp}℃ · ${recipe.time}분)`;
+
+          const analysis = analyzeRecipe(recipe);
+          const isNewDex = !collectedDex.has(analysis.dexId);
+          collectedDex.add(analysis.dexId);
+          renderDex();
+
+          const gateObj = GATES[activeGate];
+          if (gateObj.check(analysis.metrics)) {
+            const firstPass = !passedGates.has(activeGate);
+            passedGates.add(activeGate);
+            renderGates();
+            renderLabPreview(1);
+            if (firstPass) {
+              showToast(`${gateObj.title} 통과!`);
+            }
+          } else if (isNewDex) {
+            showToast(`도감에 '${analysis.title}' 등록됨`);
+          }
+        }
+      }
+
+      requestAnimationFrame(tick);
+    }
+
+    /**
+     * 기초 10문제 퀴즈 렌더링
+     */
+    function renderQuiz() {
+      const total = QUIZ_DATA.length;
+      const q = QUIZ_DATA[quizIndex];
+      const answeredCount = Object.keys(quizAnswers).length;
+      const correctCount = Object.values(quizAnswers).filter(Boolean).length;
+
+      document.getElementById('quizProgressLabel').textContent = `${quizIndex + 1} / ${total} 문제`;
+      document.getElementById('quizBarFill').style.width = `${((quizIndex + 1) / total) * 100}%`;
+      document.getElementById('quizScoreLabel').textContent = `정답 ${correctCount} / ${answeredCount}개`;
+
+      const qBox = document.getElementById('quizQuestionBox');
+      const rBox = document.getElementById('quizReportBox');
+
+      if (quizFinished) {
+        qBox.classList.add('hidden');
+        rBox.classList.remove('hidden');
+        document.getElementById('quizReportScore').textContent = `${correctCount} / ${total}`;
+        document.getElementById('quizReportComment').textContent =
+          correctCount >= 7
+            ? '기초 개념을 잘 잡았어요! 이제 관문 테스트와 실험실에서 직접 비율을 조절해보세요.'
+            : '핵심 키워드를 확인했으니 관문 테스트와 실험실을 오가며 감을 익혀보세요.';
+
+        const list = quizKeywords.size > 0 ? [...quizKeywords] : QUIZ_DATA.map((item) => item.keyword);
+        document.getElementById('quizReportKeywords').innerHTML = list
+          .map((kw) => `<span class="px-3 py-1 rounded-full text-sm bg-white border border-[#c5d8cc] text-[#274939]">${kw}</span>`)
+          .join('');
+        return;
+      }
+
+      qBox.classList.remove('hidden');
+      rBox.classList.add('hidden');
+      document.getElementById('quizTopicLabel').textContent = `주제 · ${q.topic}`;
+      document.getElementById('quizPromptText').textContent = `${q.id}. ${q.question}`;
+
+      const picked = quizAnswers[q.id];
+      const choicesEl = document.getElementById('quizChoicesBox');
+      choicesEl.innerHTML = q.choices
+        .map((c, idx) => {
+          let cls = 'border-[#dfd2bf] bg-white hover:bg-[#faf6f0] text-[#2f241d]';
+          if (picked !== undefined) {
+            if (idx === q.answer) {
+              cls = 'border-[#2f6b50] bg-[#eef7f2] text-[#1f4735] font-bold';
+            } else if (idx === picked && picked !== q.answer) {
+              cls = 'border-[#b84a39] bg-[#fdf2f0] text-[#7c291d]';
+            }
+          }
+          return `
+            <button
+              type="button"
+              data-choice="${idx}"
+              class="quiz-choice-btn w-full text-left px-4 py-3 rounded-xl border text-sm transition cursor-pointer ${cls}"
+            >
+              ${idx + 1}. ${c}
+            </button>
+          `;
+        })
+        .join('');
+
+      choicesEl.querySelectorAll('.quiz-choice-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.dataset.choice);
+          quizAnswers[q.id] = idx;
+          quizKeywords.add(q.keyword);
+          renderQuiz();
+        });
+      });
+
+      const fbBox = document.getElementById('quizFeedbackBox');
+      const nextBtn = document.getElementById('btnNextQuiz');
+      if (picked !== undefined) {
+        fbBox.classList.remove('hidden');
+        const isRight = picked === q.answer;
+        document.getElementById('quizResultText').textContent = isRight ? '정답입니다' : '오답입니다';
+        document.getElementById('quizResultText').className =
+          `text-sm font-bold ${isRight ? 'text-[#2f6b50]' : 'text-[#b84a39]'}`;
+        document.getElementById('quizKeywordText').textContent = `핵심 키워드: ${q.keyword}`;
+        document.getElementById('quizExplanationText').textContent = q.explanation;
+        nextBtn.textContent = quizIndex === total - 1 ? '완료 리포트 보기' : '다음 문제';
+      } else {
+        fbBox.classList.add('hidden');
+      }
+    }
+
+    /**
+     * 관문 테스트 렌더링
+     */
+    function renderGates() {
+      document.getElementById('gateOverallProgress').textContent = `통과 관문: ${passedGates.size} / 3`;
+
+      ['gate1', 'gate2', 'gate3'].forEach((id) => {
+        const btn = document.querySelector(`.gate-card-btn[data-gate="${id}"]`);
+        const statusEl = document.getElementById(`gateStatus-${id}`);
+        const isSelected = id === activeGate;
+        const isPassed = passedGates.has(id);
+
+        btn.className = isSelected
+          ? 'gate-card-btn text-left rounded-2xl border-2 border-[#7c4d2b] bg-[#faf4ec] p-5 transition cursor-pointer'
+          : 'gate-card-btn text-left rounded-2xl border border-[#e5dac9] bg-white hover:bg-[#faf6f0] p-5 transition cursor-pointer';
+
+        statusEl.textContent = isPassed ? '통과 완료' : '미통과';
+        statusEl.className = `text-sm font-bold mt-3 ${isPassed ? 'text-[#2f6b50]' : 'text-[#6e5a4c]'}`;
+      });
+
+      const current = GATES[activeGate];
+      document.getElementById('activeGateTitle').textContent = current.title;
+      document.getElementById('activeGateDesc').textContent = current.desc;
+
+      const isCurrentPassed = passedGates.has(activeGate);
+      document.getElementById('activeGateBanner').classList.toggle('hidden', !isCurrentPassed);
+
+      const order = ['gate1', 'gate2', 'gate3'];
+      const hasNext = isCurrentPassed && order.indexOf(activeGate) < order.length - 1;
+      document.getElementById('btnAdvanceGate').classList.toggle('hidden', !hasNext);
+    }
+
+    /**
+     * 실험 도감 렌더링
+     */
+    function renderDex() {
+      document.getElementById('dexCountLabel').textContent = `수집 ${collectedDex.size} / ${DEX_ITEMS.length}`;
+      document.getElementById('dexGrid').innerHTML = DEX_ITEMS.map((item) => {
+        const unlocked = collectedDex.has(item.id);
+        return `
+          <div class="rounded-2xl border p-5 space-y-1.5 ${
+            unlocked
+              ? 'border-[#d5e3da] bg-[#f7fbf9]'
+              : 'border-[#e5dac9] bg-[#faf6f0]'
+          }">
+            <div class="text-xs font-bold ${unlocked ? 'text-[#2f6b50]' : 'text-[#8c796a]'}">
+              ${unlocked ? '수집 완료' : '미수집'}
+            </div>
+            <div class="text-base font-bold text-[#2f241d]">
+              ${unlocked ? item.name : '???'}
+            </div>
+            <p class="text-sm text-[#5c483a] leading-relaxed">
+              ${unlocked ? item.desc : '실험실에서 해당 특징이 나타나도록 구워보세요.'}
+            </p>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /**
+     * 상단 모드 탭 전환
+     */
+    function switchView(viewName) {
+      currentView = viewName;
+
+      const map = {
+        quiz: ['tabQuiz', 'viewQuiz'],
+        gate: ['tabGate', 'viewGate'],
+        lab: ['tabLab', 'viewLab'],
+        dex: ['tabDex', 'viewDex']
+      };
+
+      Object.keys(map).forEach((key) => {
+        const [tabId, secId] = map[key];
+        const tabEl = document.getElementById(tabId);
+        const secEl = document.getElementById(secId);
+        const active = key === viewName;
+
+        secEl.classList.toggle('hidden', !active);
+        tabEl.className = active
+          ? 'mode-tab px-4 py-2.5 rounded-xl text-sm font-medium border border-[#7c4d2b] bg-[#7c4d2b] text-white transition cursor-pointer'
+          : 'mode-tab px-4 py-2.5 rounded-xl text-sm font-medium border border-[#dfd2bf] bg-white text-[#4b382b] hover:bg-[#f5efe6] transition cursor-pointer';
+      });
+    }
+
+    function resetQuiz() {
+      quizIndex = 0;
+      quizAnswers = {};
+      quizFinished = false;
+      renderQuiz();
+    }
+
+    function bindEvents() {
+      document.getElementById('tabQuiz').addEventListener('click', () => switchView('quiz'));
+      document.getElementById('tabGate').addEventListener('click', () => switchView('gate'));
+      document.getElementById('tabLab').addEventListener('click', () => switchView('lab'));
+      document.getElementById('tabDex').addEventListener('click', () => switchView('dex'));
+
+      // 퀴즈 이벤트
+      document.getElementById('btnNextQuiz').addEventListener('click', () => {
+        if (quizIndex < QUIZ_DATA.length - 1) {
+          quizIndex += 1;
+        } else {
+          quizFinished = true;
+        }
+        renderQuiz();
+      });
+      document.getElementById('btnRestartQuiz').addEventListener('click', resetQuiz);
+      document.getElementById('btnRetakeQuizFromReport').addEventListener('click', resetQuiz);
+      document.getElementById('btnGoGateFromQuiz').addEventListener('click', () => switchView('gate'));
+
+      // 관문 이벤트
+      document.querySelectorAll('.gate-card-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          activeGate = btn.dataset.gate;
+          renderGates();
+          renderLabPreview(1);
+        });
+      });
+
+      document.getElementById('btnPracticeInLab').addEventListener('click', () => {
+        switchView('lab');
+        renderLabPreview(1);
+      });
+
+      document.getElementById('btnAdvanceGate').addEventListener('click', () => {
+        const order = ['gate1', 'gate2', 'gate3'];
+        const nextIdx = order.indexOf(activeGate) + 1;
+        if (nextIdx < order.length) {
+          activeGate = order[nextIdx];
+          renderGates();
+          renderLabPreview(1);
+        }
+      });
+
+      // 실험실 슬라이더 및 버튼 이벤트
+      const sliders = [
+        ['inputFlour', 'flour'],
+        ['inputButter', 'butter'],
+        ['inputSugar', 'sugar'],
+        ['inputEgg', 'egg'],
+        ['inputTemp', 'temp'],
+        ['inputTime', 'time']
+      ];
+
+      sliders.forEach(([elId, key]) => {
+        document.getElementById(elId).addEventListener('input', (e) => {
+          if (isBaking) return;
+          recipe[key] = Number(e.target.value);
+          renderLabPreview(1);
+        });
+      });
+
+      document.querySelectorAll('.sugar-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          if (isBaking) return;
+          recipe.sugarType = btn.dataset.sugar;
+          renderLabPreview(1);
+        });
+      });
+
+      document.querySelectorAll('.method-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          if (isBaking) return;
+          recipe.method = btn.dataset.method;
+          renderLabPreview(1);
+        });
+      });
+
+      document.querySelectorAll('.chill-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          if (isBaking) return;
+          recipe.chill = btn.dataset.chill;
+          renderLabPreview(1);
+        });
+      });
+
+      document.getElementById('btnResetLab').addEventListener('click', () => {
+        if (isBaking) return;
+        recipe = { ...DEFAULT_RECIPE };
+        document.getElementById('inputFlour').value = recipe.flour;
+        document.getElementById('inputButter').value = recipe.butter;
+        document.getElementById('inputSugar').value = recipe.sugar;
+        document.getElementById('inputEgg').value = recipe.egg;
+        document.getElementById('inputTemp').value = recipe.temp;
+        document.getElementById('inputTime').value = recipe.time;
+        document.getElementById('bakeBarFill').style.width = '0%';
+        document.getElementById('bakeStatusText').textContent = '설정한 배합으로 구워 쿠키의 퍼짐·단면·식감과 과학 원리를 확인하세요.';
+        renderLabPreview(1);
+        showToast('기본 배합으로 복원했습니다.');
+      });
+
+      document.getElementById('btnBakeCookie').addEventListener('click', startBaking);
+
+      document.getElementById('btnResetDex').addEventListener('click', () => {
+        collectedDex.clear();
+        renderDex();
+        showToast('실험 도감을 초기화했습니다.');
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      bindEvents();
+      renderQuiz();
+      renderGates();
+      renderDex();
+      renderLabPreview(1);
+      switchView('lab');
+    });
+  </script>
+</body>
+</html>
